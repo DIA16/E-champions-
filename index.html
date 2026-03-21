@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>E-Champions Result Verifier</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg2: #f5f5f3;
+    --bg3: #ededea;
+    --text: #1a1a18;
+    --text2: #5f5e5a;
+    --text3: #888780;
+    --border: rgba(0,0,0,0.12);
+    --border2: rgba(0,0,0,0.22);
+    --info-bg: #e6f1fb;
+    --info-text: #185fa5;
+    --info-border: rgba(24,95,165,0.3);
+    --success-bg: #eaf3de;
+    --success-text: #3b6d11;
+    --danger-bg: #fcebeb;
+    --danger-text: #a32d2d;
+    --teal: #0f6e56;
+    --teal-bg: #e1f5ee;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a18;
+      --bg2: #2c2c2a;
+      --bg3: #444441;
+      --text: #f1efe8;
+      --text2: #b4b2a9;
+      --text3: #888780;
+      --border: rgba(255,255,255,0.12);
+      --border2: rgba(255,255,255,0.22);
+      --info-bg: #0c447c;
+      --info-text: #b5d4f4;
+      --info-border: rgba(181,212,244,0.3);
+      --success-bg: #27500a;
+      --success-text: #c0dd97;
+      --danger-bg: #791f1f;
+      --danger-text: #f7c1c1;
+      --teal: #5dcaa5;
+      --teal-bg: #085041;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg2);
+    color: var(--text);
+    font-size: 15px;
+    min-height: 100vh;
+  }
+  .header {
+    background: var(--bg);
+    border-bottom: 0.5px solid var(--border);
+    padding: 1rem 1.25rem 0.75rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .header h1 { font-size: 16px; font-weight: 600; color: var(--text); }
+  .header p { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .steps {
+    display: flex;
+    gap: 4px;
+    margin-top: 10px;
+    padding-bottom: 2px;
+  }
+  .step-dot {
+    flex: 1;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+  .step-dot.done { background: var(--teal); }
+  .step-dot.active { background: var(--info-text); }
+  .wrap { padding: 1rem 1rem 4rem; max-width: 640px; margin: 0 auto; }
+  .section-title { font-size: 15px; font-weight: 600; color: var(--text); margin: 1.25rem 0 0.25rem; }
+  .section-sub { font-size: 12px; color: var(--text3); margin-bottom: 1rem; }
+  label { font-size: 13px; color: var(--text2); display: block; margin-bottom: 4px; }
+  select, input[type=text], input[type=number] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    margin-bottom: 12px;
+    -webkit-appearance: none;
+  }
+  select:focus, input:focus {
+    outline: none;
+    border-color: var(--info-text);
+    box-shadow: 0 0 0 3px var(--info-bg);
+  }
+  .btn {
+    width: 100%;
+    padding: 12px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary {
+    background: var(--info-bg);
+    color: var(--info-text);
+    border-color: var(--info-border);
+  }
+  .btn-success {
+    background: var(--success-bg);
+    color: var(--success-text);
+    border-color: rgba(59,109,17,0.3);
+  }
+  .btn-teal {
+    background: var(--teal-bg);
+    color: var(--teal);
+    border-color: rgba(15,110,86,0.3);
+  }
+  .btn-sm {
+    padding: 7px 10px;
+    font-size: 12px;
+    width: auto;
+    display: inline-block;
+    margin-top: 0;
+  }
+  .card {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1rem;
+    margin-bottom: 12px;
+  }
+  .pupil-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .pupil-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--info-bg);
+    color: var(--info-text);
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .pupil-name-input {
+    flex: 1;
+    margin-bottom: 0 !important;
+    font-weight: 500;
+  }
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    background: var(--bg2);
+    border-radius: var(--radius);
+    padding: 8px 10px;
+  }
+  .toggle-row label { margin-bottom: 0; font-size: 13px; color: var(--text2); cursor: pointer; }
+  .toggle {
+    width: 38px;
+    height: 22px;
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--border2);
+    border-radius: 11px;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .toggle:checked { background: var(--teal); }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: left 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .toggle:checked::after { left: 18px; }
+  .score-header {
+    display: grid;
+    grid-template-columns: 1fr 52px 52px 52px 58px;
+    gap: 4px;
+    margin-bottom: 4px;
+    padding: 0 2px;
+  }
+  .score-header span {
+    font-size: 10px;
+    color: var(--text3);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    text-align: center;
+  }
+  .score-header span:first-child { text-align: left; }
+  .score-row {
+    display: grid;
+    grid-template-columns: 1fr 52px 52px 52px 58px;
+    gap: 4px;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+  .score-row .subj-label {
+    font-size: 11px;
+    color: var(--text);
+    line-height: 1.3;
+    padding-right: 4px;
+  }
+  .score-row input {
+    margin-bottom: 0;
+    padding: 6px 4px;
+    font-size: 12px;
+    text-align: center;
+  }
+  .total-cell {
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    padding: 6px 4px;
+    border-radius: var(--radius);
+    background: var(--bg2);
+  }
+  .total-ok { color: var(--success-text); background: var(--success-bg); }
+  .total-err { color: var(--danger-text); background: var(--danger-bg); }
+  .divider { height: 0.5px; background: var(--border); margin: 10px 0; }
+  .result-table-wrap { overflow-x: auto; }
+  table.rt { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.rt th {
+    text-align: left;
+    padding: 6px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    border-bottom: 0.5px solid var(--border);
+  }
+  table.rt td {
+    padding: 7px 8px;
+    color: var(--text);
+    border-bottom: 0.5px solid var(--border);
+  }
+  table.rt tr:last-child td { border-bottom: none; }
+  table.rt .summary-row td {
+    font-weight: 600;
+    background: var(--bg2);
+    color: var(--teal);
+  }
+  table.rt td:last-child, table.rt th:last-child { text-align: right; }
+  .pupil-result-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .badge-info { background: var(--info-bg); color: var(--info-text); }
+  .alert {
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+  .alert-danger { background: var(--danger-bg); color: var(--danger-text); }
+  .alert-success { background: var(--success-bg); color: var(--success-text); }
+  .spacer { height: 8px; }
+  .instruction-card {
+    background: var(--info-bg);
+    border: 0.5px solid var(--info-border);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    margin-bottom: 12px;
+  }
+  .instruction-card p { font-size: 13px; color: var(--info-text); line-height: 1.6; }
+  .instruction-card strong { font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>E-Champions Result Verifier</h1>
+  <p id="header-sub">Verify pupil scores quickly and accurately</p>
+  <div class="steps">
+    <div class="step-dot active" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <div class="step-dot" id="dot3"></div>
+    <div class="step-dot" id="dot4"></div>
+  </div>
+</div>
+
+<div class="wrap" id="app"></div>
+
+<script>
+const CLASSES = ['Basic 1','Basic 2','Basic 3A','Basic 3B','Basic 4A','Basic 4B','Basic 5','Nursery Two','Nursery One','KG 2A','KG 2B','KG 1','Creche'];
+
+const CLASS_GROUP = {
+  'Basic 1':1,'Basic 2':1,'Basic 3A':1,'Basic 3B':1,'Basic 4A':1,'Basic 4B':1,'Basic 5':1,
+  'Nursery Two':2,'Nursery One':3,'KG 2A':4,'KG 2B':4,'KG 1':5,'Creche':5
+};
+
+const SUBJECTS = {
+  1:['English','Basic Science','Creative Arts','Social Studies','Mathematics','Civic Education','Yoruba','Physical & Health Education','Verbal Reasoning','Agricultural Science','Computer Studies','Christian Religious Studies','Quantitative Reasoning','Fine Arts','Handwriting','Spelling','Phonics','French'],
+  2:['Literacy','Basic Science','Creative Arts','Social Studies','Numeracy','Civic Education','Rhymes','Physical & Health Education','Verbal Reasoning','Computer Studies','Bible Knowledge','Quantitative Reasoning','Handwriting'],
+  3:['Literacy','Basic Science','Creative Arts','Social Studies','Numeracy','Civic Education','Rhymes','Physical & Health Education','Verbal Reasoning','Computer Studies','Bible Knowledge','Quantitative Reasoning','Handwriting'],
+  4:['Numeracy','Literacy','Quantitative Reasoning','Verbal Reasoning','Social Habits','Health Habits','Poem','Basic Science','Creative Arts'],
+  5:['Numeracy','Literacy','Social Habits','Health Habits','Poem','Basic Science','Creative Arts']
+};
+
+const RELIG_SUBJ = {1:'Christian Religious Studies',2:'Bible Knowledge',3:'Bible Knowledge'};
+
+let S = {
+  step: 1,
+  cls: 'Basic 5',
+  numPupils: '',
+  pupils: [],
+  results: []
+};
+
+function setStep(n) {
+  S.step = n;
+  ['dot1','dot2','dot3','dot4'].forEach((id,i)=>{
+    const d = document.getElementById(id);
+    d.className = 'step-dot' + (i+1 < n ? ' done' : i+1 === n ? ' active' : '');
+  });
+  const subs = ['Select class','Enter pupil names & scores','Review results',''];
+  const el = document.getElementById('header-sub');
+  if(el) el.textContent = subs[n-1] || 'E-Champions Nursery and Primary School';
+}
+
+function render() {
+  const app = document.getElementById('app');
+  if(S.step === 1) app.innerHTML = stepOne();
+  else if(S.step === 2) app.innerHTML = stepTwo();
+  else if(S.step === 3) app.innerHTML = stepThree();
+  else if(S.step === 4) app.innerHTML = stepFour();
+  setStep(S.step);
+}
+
+/* ── STEP 1: Class & pupil count ── */
+function stepOne() {
+  const opts = CLASSES.map(c=>`<option value="${c}" ${S.cls===c?'selected':''}>${c}</option>`).join('');
+  return `
+<p class="section-title">Select Class</p>
+<p class="section-sub">Choose the class you are currently verifying</p>
+<div class="card">
+  <label>Class</label>
+  <select id="cls-sel">${opts}</select>
+  <label>Number of pupils in this class</label>
+  <input type="number" id="np" min="1" max="60" placeholder="e.g. 25" value="${S.numPupils||''}">
+  <div class="spacer"></div>
+  <button class="btn btn-primary" onclick="startClass()">Continue →</button>
+</div>`;
+}
+
+function startClass() {
+  const cls = document.getElementById('cls-sel').value;
+  const n = parseInt(document.getElementById('np').value);
+  if(!n || n < 1 || n > 60) { alert('Please enter a valid number of pupils (1–60).'); return; }
+  S.cls = cls;
+  S.numPupils = n;
+  const grp = CLASS_GROUP[cls];
+  const subjs = SUBJECTS[grp];
+  // Preserve existing pupil data if re-entering
+  const existing = S.pupils;
+  S.pupils = Array.from({length: n}, (_, i) => existing[i] || {
+    name: '',
+    inclRelig: true,
+    scores: Object.fromEntries(subjs.map(s => [s, { t1:'', t2:'', ex:'' }]))
+  });
+  S.step = 2;
+  render();
+}
+
+/* ── STEP 2: Enter scores ── */
+function stepTwo() {
+  const grp = CLASS_GROUP[S.cls];
+  const subjs = SUBJECTS[grp];
+  const religSubj = RELIG_SUBJ[grp] || null;
+  const hasExamOnly = grp >= 4;
+
+  let html = `
+<p class="section-title">${S.cls} — Enter Scores</p>
+<p class="section-sub">Test scores are out of 20. Exam score is out of 60.</p>
+<div class="instruction-card">
+  <p><strong>Tip:</strong> Totals calculate automatically as you type. A <span style="color:var(--danger-text);font-weight:600">red total</span> means a score exceeds its maximum — check that entry.</p>
+</div>`;
+
+  S.pupils.forEach((p, pi) => {
+    const activeSubjs = subjs.filter(s => !(religSubj && s === religSubj && !p.inclRelig));
+    html += `<div class="card">
+<div class="pupil-header">
+  <div class="pupil-num">${pi+1}</div>
+  <input type="text" class="pupil-name-input" placeholder="Pupil full name" value="${escHtml(p.name)}" onchange="S.pupils[${pi}].name=this.value">
+</div>`;
+
+    if(religSubj) {
+      html += `<div class="toggle-row">
+  <input type="checkbox" class="toggle" id="rel${pi}" ${p.inclRelig?'checked':''} onchange="S.pupils[${pi}].inclRelig=this.checked;render()">
+  <label for="rel${pi}">Include ${religSubj}</label>
+</div>`;
+    }
+
+    html += `<div class="score-header">
+  <span>Subject</span>
+  <span>Test 1</span>
+  <span>Test 2</span>
+  <span>Exam</span>
+  <span>Total</span>
+</div>`;
+
+    activeSubjs.forEach(s => {
+      const sc = p.scores[s] || {t1:'',t2:'',ex:''};
+      const t1 = parseFloat(sc.t1)||0;
+      const t2 = parseFloat(sc.t2)||0;
+      const ex = parseFloat(sc.ex)||0;
+      const hasAny = sc.t1!==''||sc.t2!==''||sc.ex!=='';
+      const total = t1+t2+ex;
+      const overLimit = sc.t1>20||sc.t2>20||sc.ex>60||total>100;
+      const totalClass = !hasAny ? '' : overLimit ? 'total-err' : 'total-ok';
+      const totalDisp = hasAny ? total : '—';
+
+      html += `<div class="score-row">
+  <span class="subj-label">${s}</span>
+  <input type="number" min="0" max="20" step="0.5" placeholder="0" value="${sc.t1}" onchange="updateScore(${pi},'${escAttr(s)}','t1',this.value)">
+  <input type="number" min="0" max="20" step="0.5" placeholder="0" value="${sc.t2}" onchange="updateScore(${pi},'${escAttr(s)}','t2',this.value)">
+  <input type="number" min="0" max="60" step="0.5" placeholder="0" value="${sc.ex}" onchange="updateScore(${pi},'${escAttr(s)}','ex',this.value)">
+  <div class="total-cell ${totalClass}">${totalDisp}</div>
+</div>`;
+    });
+
+    html += `</div>`; // close card
+  });
+
+  html += `<button class="btn btn-primary" onclick="calcResults()">Calculate Results →</button>
+<div class="spacer"></div>
+<button class="btn" onclick="S.step=1;render()">← Change class</button>`;
+  return html;
+}
+
+function updateScore(pi, subj, field, val) {
+  S.pupils[pi].scores[subj][field] = val === '' ? '' : parseFloat(val)||0;
+  render();
+}
+
+/* ── STEP 3: Results ── */
+function calcResults() {
+  // Save pupil names before re-rendering
+  document.querySelectorAll('.pupil-name-input').forEach((el,i)=>{ if(S.pupils[i]) S.pupils[i].name=el.value; });
+
+  const grp = CLASS_GROUP[S.cls];
+  const subjs = SUBJECTS[grp];
+  const religSubj = RELIG_SUBJ[grp]||null;
+
+  S.results = S.pupils.map(p => {
+    const activeSubjs = subjs.filter(s => !(religSubj && s === religSubj && !p.inclRelig));
+    const totals = activeSubjs.map(s => {
+      const sc = p.scores[s]||{t1:0,t2:0,ex:0};
+      return (parseFloat(sc.t1)||0)+(parseFloat(sc.t2)||0)+(parseFloat(sc.ex)||0);
+    });
+    const grand = totals.reduce((a,b)=>a+b,0);
+    const avg = totals.length ? Math.round((grand/totals.length)*10)/10 : 0;
+    return { name: p.name||'(no name)', activeSubjs, totals, grand, avg };
+  });
+
+  S.step = 3;
+  render();
+}
+
+function stepThree() {
+  const hasErrors = S.results.some(r => r.totals.some(t=>t>100));
+  let html = `
+<p class="section-title">${S.cls} — Results</p>
+<p class="section-sub">Compare these with your manual computation</p>`;
+
+  if(hasErrors) {
+    html += `<div class="alert alert-danger">⚠ Some totals exceed 100. Please go back and check those entries.</div>`;
+  } else {
+    html += `<div class="alert alert-success">✓ All totals are within range.</div>`;
+  }
+
+  S.results.forEach((r, i) => {
+    html += `<div class="card">
+<div class="pupil-result-name">
+  <span>${i+1}. ${escHtml(r.name)}</span>
+  <span class="badge badge-info">${r.activeSubjs.length} subjects</span>
+</div>
+<div class="result-table-wrap">
+<table class="rt">
+<thead><tr><th>Subject</th><th>Total</th></tr></thead>
+<tbody>`;
+    r.activeSubjs.forEach((s,si)=>{
+      const over = r.totals[si]>100;
+      html+=`<tr><td>${s}</td><td style="${over?'color:var(--danger-text);font-weight:600':''}">${r.totals[si]}</td></tr>`;
+    });
+    html+=`</tbody><tfoot>
+<tr class="summary-row"><td>Grand Total</td><td>${r.grand}</td></tr>
+<tr class="summary-row"><td>Average (÷ ${r.activeSubjs.length})</td><td>${r.avg}</td></tr>
+</tfoot></table></div></div>`;
+  });
+
+  html += `<button class="btn btn-success" onclick="downloadCSV()">⬇ Download Results as CSV</button>
+<div class="spacer"></div>
+<button class="btn btn-teal" onclick="S.step=2;render()">← Back to scores</button>
+<div class="spacer"></div>
+<button class="btn" onclick="startFresh()">Start new class</button>`;
+  return html;
+}
+
+function stepFour() { return ''; }
+
+/* ── DOWNLOAD ── */
+function downloadCSV() {
+  const cls = S.cls;
+  const date = new Date().toLocaleDateString('en-NG',{day:'2-digit',month:'short',year:'numeric'});
+  let rows = [];
+
+  // Header row
+  const allSubjs = S.results.reduce((acc,r)=>{r.activeSubjs.forEach(s=>{if(!acc.includes(s))acc.push(s);}); return acc;},[]);
+  const header = ['S/N','Pupil Name',...allSubjs,'Grand Total','No. of Subjects','Average'];
+  rows.push(header.join(','));
+
+  S.results.forEach((r,i)=>{
+    const subjMap = Object.fromEntries(r.activeSubjs.map((s,si)=>[s,r.totals[si]]));
+    const row = [
+      i+1,
+      `"${r.name}"`,
+      ...allSubjs.map(s=>subjMap[s]!==undefined?subjMap[s]:'—'),
+      r.grand,
+      r.activeSubjs.length,
+      r.avg
+    ];
+    rows.push(row.join(','));
+  });
+
+  // Summary at bottom
+  rows.push('');
+  rows.push(`"Class: ${cls}"`);
+  rows.push(`"Date: ${date}"`);
+  rows.push(`"Generated by E-Champions Result Verifier"`);
+
+  const csvContent = rows.join('\n');
+  const blob = new Blob([csvContent], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${cls.replace(/\s/g,'_')}_Results_${date.replace(/\s/g,'_')}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function startFresh() {
+  S = { step:1, cls:'Basic 5', numPupils:'', pupils:[], results:[] };
+  render();
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(s) {
+  return String(s).replace(/'/g,"\\'");
+}
+
+render();
+</script>
+</body>
+</html>
